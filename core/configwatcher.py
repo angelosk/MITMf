@@ -17,28 +17,46 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 #
-import pyinotify
-import threading
-from configobj import ConfigObj
+try:
+    import pyinotify
 
-class ConfigWatcher(pyinotify.ProcessEvent, object):
+    import threading
+    from configobj import ConfigObj
 
-    @property
-    def config(self):
-        return ConfigObj("./config/mitmf.conf")
+    class ConfigWatcher(pyinotify.ProcessEvent, object):
+        @property
+        def config(self):
+            return ConfigObj("./config/mitmf.conf")
 
-    def process_IN_MODIFY(self, event):
-        self.on_config_change()
+        def process_IN_MODIFY(self, event):
+            self.on_config_change()
 
-    def start_config_watch(self):
-        wm = pyinotify.WatchManager()
-        wm.add_watch('./config/mitmf.conf', pyinotify.IN_MODIFY)
-        notifier = pyinotify.Notifier(wm, self)
+        def start_config_watch(self):
+            wm = pyinotify.WatchManager()
+            wm.add_watch('./config/mitmf.conf', pyinotify.IN_MODIFY)
+            notifier = pyinotify.Notifier(wm, self)
         
-        t = threading.Thread(name='ConfigWatcher', target=notifier.loop)
-        t.setDaemon(True)
-        t.start()
+            t = threading.Thread(name='ConfigWatcher', target=notifier.loop)
+            t.setDaemon(True)
+            t.start()
 
-    def on_config_change(self):
-        """ We can subclass this function to do stuff after the config file has been modified"""
-        pass
+        def on_config_change(self):
+            """ We can subclass this function to do stuff after the config file has been modified"""
+            pass
+except BaseException:
+    from configobj import ConfigObj
+
+    class ConfigWatcher(object):
+        @property
+        def config(self):
+            return ConfigObj("./config/mitmf.conf")
+
+        def process_IN_MODIFY(self, event):
+            self.on_config_change()
+
+        def start_config_watch(self):
+            pass
+
+        def on_config_change(self):
+            """ We can subclass this function to do stuff after the config file has been modified"""
+            pass

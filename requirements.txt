@@ -1,5 +1,5 @@
-git+git://github.com/kti/python-netfilterqueue
-pyinotify
+git+git://github.com/kti/python-netfilterqueue ; sys_platform == "linux"
+pyinotify; sys_platform == "linux"
 pycrypto
 pyasn1
 cryptography
